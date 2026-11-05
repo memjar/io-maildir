@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed an entry id selecting another message by prefix.
+
+  The locator matched a prefix in `cur/`, so `abc` could read, flag, move or delete `cur/abc123:2,F`, and it never scanned `new/`, so the id listed for a suffixed entry there was not found. It now accepts an exact id or complete file name only, and refuses an empty, dot-prefixed or path-like one before touching the disk.
+
+- Fixed a flag write given a complete file name doubling its info suffix: the new name is built from the located id and the entry's actual flags.
+
 ## [0.3.1] - 2026-08-23
 
 ### Fixed

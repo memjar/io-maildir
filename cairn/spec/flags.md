@@ -30,9 +30,9 @@ Adding, removing or replacing the flags of an entry in `cur/` SHALL rename it un
 
 ### Requirement: Gaining a flag moves an entry out of new/
 
-An entry in `new/` carries no info suffix and therefore no flags. A flag write naming it whose resulting flag set is non-empty SHALL rename it to `cur/` under the same unique id, with that flag set as its info suffix. The id SHALL NOT change, so an identifier a caller stored stays valid across the move.
+An entry io-maildir writes into `new/` carries no info suffix and therefore no flags; one left there with a suffix by another client is read with the flags it carries. A flag write naming an entry in `new/` whose flag set changes and stays non-empty SHALL rename it to `cur/` under the same unique id, with that flag set as its info suffix. The id SHALL NOT change, so an identifier a caller stored stays valid across the move.
 
-A write whose resulting flag set is empty SHALL leave the entry in `new/`: it breaks no invariant, and moving it would mark an unread message as no longer new as a side effect of a write that changed nothing.
+A write whose resulting flag set is unchanged SHALL leave the entry in `new/`: moving it would mark an unread message as no longer new as a side effect of a write that changed nothing. A write clearing the flags of a suffixed entry in `new/` SHALL rename it to its bare id there. The destination name SHALL be built from the located id, never from the caller's input, so a complete file name never doubles the suffix.
 
 #### Scenario: A message read as seen
 
@@ -45,6 +45,18 @@ A write whose resulting flag set is empty SHALL leave the entry in `new/`: it br
 - GIVEN the same message, still in `new/`
 - WHEN a flag it does not carry is removed
 - THEN nothing is renamed and the message stays in `new/`
+
+#### Scenario: Clearing a suffixed entry in new/
+
+- GIVEN `new/abc:2,F` on Unix, left by another client
+- WHEN its last flag is removed
+- THEN it becomes `new/abc` and is still found as `abc`
+
+#### Scenario: A complete file name used for a flag write
+
+- GIVEN `cur/abc:2,F` on Unix
+- WHEN `F` is removed using the complete file name `abc:2,F`
+- THEN it becomes `cur/abc:2,`, the suffix written once
 
 ### Requirement: A flag write never touches an entry in tmp/
 
